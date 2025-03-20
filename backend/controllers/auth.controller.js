@@ -56,18 +56,18 @@ export const login=async(req,res)=>{
       const isPasswordCorrect=await bcrypt.compare(password,user?.password||"")
 
       if(!user|| !isPasswordCorrect){
-        return res.status(400).json({error:"invalid username or password"})
+        return res.status(400).json({error:"missing username or password"})
       }
-      generateTokenAndSetCookie(User._id,res)
+      generateTokenAndSetCookie(user._id,res)
       res.status(200).json({
-          _id:User._id,
-          fullName:User.fullName,
-          username:User.username,
-          email:User.email,
-          followers:User.followers,
-          following:User.following,
-          profileImg:User.profileImg,
-          coverImg:User.coverImg,
+          _id:user._id,
+          fullName:user.fullName,
+          username:user.username,
+          email:user.email,
+          followers:user.followers,
+          following:user.following,
+          profileImg:user.profileImg,
+          coverImg:user.coverImg,
       })
     }catch(error){
         console.log("error in login controller",error.message);
