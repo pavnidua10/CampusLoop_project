@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
+import axios from 'axios';
 import {toast} from "react-hot-toast";
 const Sidebar = () => {
 	const queryClient=useQueryClient();
@@ -34,7 +35,7 @@ const Sidebar = () => {
 			toast.error("Logout failed");
 		}
 	})
-	const{data:authUser}=useQuery({queryKey:["authUser"]})
+	const{data:authUser}=useQuery({queryKey:["authUser"]});
 
 	return (
 		<div className='md:flex-[2_2_0] w-18 max-w-52'>
