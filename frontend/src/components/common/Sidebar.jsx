@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
-import axios from 'axios';
+
 import {toast} from "react-hot-toast";
 const Sidebar = () => {
 	const queryClient=useQueryClient();
