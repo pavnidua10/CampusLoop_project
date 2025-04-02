@@ -7,12 +7,13 @@ import RightPanel from "./components/common/RightPanel"
 import NotificationPage from "./pages/notification/NotificationPage"
 import ProfilePage from "./pages/profile/ProfilePage"
 import LoadingSpinner from "./components/common/LoadingSpinner"
-
+import { authContext } from "../authContext"
 import {Toaster} from 'react-hot-toast';
 import { useQuery } from "@tanstack/react-query"
 function App() {
+ 
   const {data:authUser,isLoading}=useQuery({
-    queryKey:['authUser'], // we can refer to this query key later 
+    queryKey:["authUser"], // we can refer to this query key later 
     queryFn:async()=>{
       try{
         const res=await fetch("/api/auth/me");
@@ -40,6 +41,7 @@ function App() {
   return (
     <>
     <div className='flex max-w-6xl mx-auto'>
+    <authContext.Provider value={authUser}>
       {authUser && <Sidebar></Sidebar>}
 			<Routes>
 				<Route path='/' element={authUser ? <HomePage /> : <Navigate to="/login"/>} />
@@ -49,10 +51,11 @@ function App() {
         <Route path='/profile/:username' element={authUser?<ProfilePage />: <Navigate to="/login"/>} />
 			</Routes>
       {authUser && <RightPanel></RightPanel>}
+      </authContext.Provider>
       <Toaster></Toaster>
 		</div>
     </>
   )
 }
 
-export default App
+export default App;

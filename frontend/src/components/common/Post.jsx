@@ -9,14 +9,20 @@ import { QueryClient, useMutation,useQuery, useQueryClient } from "@tanstack/rea
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
-
+import { useAuth } from "../../../authContext";
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
-	const{data:authUser}=useQuery({
-		queryKey:["authUser"],
+	//const{data:authUser}=useQuery({
+	//	queryKey:["authUser"],
 	
-	});
+	//});
+	const authUser=useAuth()
     const queryClient=useQueryClient();
+	const postOwner = post.user;
+	const isLiked = post.likes.includes(authUser._id);
+
+	const isMyPost =authUser._id===post.user._id;
+	const formattedDate=formatPostDate(post.createdAt);
 
     const {mutate:deletePost,isPending:isDeleting}=useMutation({
 		mutationFn:async()=>{
@@ -97,11 +103,7 @@ const Post = ({ post }) => {
 			toast.error(error.message);
 		}
 	})
-	const postOwner = post.user;
-	const isLiked = post.likes.includes(authUser._id);
-
-	const isMyPost =authUser._id===post.user._id;
-	const formattedDate=formatPostDate(post.createdAt);
+	
 
    const handleDeletePost = () => {
 		deletePost();

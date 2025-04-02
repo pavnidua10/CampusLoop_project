@@ -5,13 +5,14 @@ import { IoCloseSharp } from "react-icons/io5";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
+import { useAuth } from "../../../authContext";
 const CreatePost = () => {
 	const [text, setText] = useState("");
 	const [img, setImg] = useState(null);
 
 	const imgRef = useRef(null);
-	const {data:authUser}=useQuery({queryKey:["authUser"]})
+     const authUser=useAuth()
+	//const {data:authUser}=useQuery({queryKey:["authUser"]})
 	const queryClient=useQueryClient();
 	const {mutate:createPost,isError,isPending,error}=useMutation({
 		mutationFn:async({text,img})=>{
