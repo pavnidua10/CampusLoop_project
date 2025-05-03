@@ -2,19 +2,25 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import Notification from "../models/notification.model.js";
 import {v2 as cloudinary} from "cloudinary";
-export const getUserProfile=async(req,res)=>{
-    const {username}=req.params;
-    try{
-        const user=await User.findOne({username}).select("-password");
-        if(!user){
-           return res.status(404).json({message:"User not found"});
-        }
-        return res.status(200).json(user);
-    }catch(error){
-        console.log("error in getUserProfile: ",error.message);
-        res.status(500).json({error:error.message});
+export const getUserProfile = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username })
+      .populate('assignedMentor', 'fullName username collegeName course batchYear profileImg bio') // Populate assigned mentor's details
+      .populate('assignedMentorChatId')
+      .select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-}
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.log('Error in getUserProfile: ', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 export const followUnfollowUser=async(req,res)=>{
     try{
@@ -52,28 +58,47 @@ export const followUnfollowUser=async(req,res)=>{
         res.status(500).json({error:error.message});
     }
 };
-export const getSuggestedUsers=async(req,res)=>{
-    try{
-       const userId=req.user._id;
-       const usersFollowedByMe=await User.findById(userId).select("following");
-       const users=await User.aggregate([
-        {
-            $match:{
-                _id:{$ne:userId}
-            }
+
+export const getSuggestedUsers = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Fetch the current user's subscriptions (i.e. users they follow)
+    const currentUser = await User.findById(userId).select("subscribedTo");
+
+    // Use an empty array if subscribedTo doesn't exist yet
+    const subscribedTo = currentUser?.subscribedTo || [];
+
+    // Get random users (excluding self)
+    const users = await User.aggregate([
+      {
+        $match: {
+          _id: { $ne: userId },
         },
-        {$sample:{size:10}}
-       ])
-       const filteredUsers=users.filter(user=>!usersFollowedByMe.following.includes(user._id))
-       const suggestedUsers=filteredUsers.slice(0,4)
-       suggestedUsers.forEach((user)=>(user.password=null));
-       res.status(200).json(suggestedUsers);
-    }
-catch(error){
-   console.log("error in getSuggestedUsers: ",error.message);
-   res.status(500).json({error:error.message})
-}
+      },
+      { $sample: { size: 10 } },
+    ]);
+
+    // Filter out users already followed
+    const filteredUsers = users.filter(
+      (user) => !subscribedTo.includes(user._id.toString())
+    );
+
+    // Limit to 4
+    const suggestedUsers = filteredUsers.slice(0, 4);
+
+    // Remove password field before sending
+    suggestedUsers.forEach((user) => {
+      delete user.password;
+    });
+
+    res.status(200).json(suggestedUsers);
+  } catch (error) {
+    console.log("error in getSuggestedUsers: ", error.message);
+    res.status(500).json({ error: error.message });
+  }
 };
+
 export const updateUser=async(req,res)=>{
     const{fullName,email,username,currentPassword,newPassword,bio,link}=req.body;
     let {profileImg,coverImg}=req.body;
@@ -122,3 +147,42 @@ export const updateUser=async(req,res)=>{
       res.status(500).json({error:error.message});
     }
 }
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user by ID:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
+export const searchUsers = async (req, res) => {
+  const { query } = req.query;
+
+  if (!query || query.trim() === "") {
+    return res.status(400).json({ error: "Search query is required" });
+  }
+
+  try {
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: "i" } },
+        { name: { $regex: query, $options: "i" } },
+      ],
+    }).select("fullName username _id");
+
+    res.json({ users });
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+

@@ -3,8 +3,26 @@ const userSchema=new mongoose.Schema({
     username:{
         type:String,
         required:true,
-        unique:true,
+        unique: true
+     },
+    collegeName:{
+       type:String,
     },
+    course:{
+        type:String,
+     },
+     batchYear:{
+        type:Number,
+     },
+     userRole:{
+        type:String,
+        enum:["Student","Senior","Alumni"],
+        default:"Student"
+     },
+     isAvailableForMentorship:{
+        type:Boolean,
+        default:false,
+     },
     fullName:{
         type:String,
         required:true,
@@ -20,14 +38,14 @@ const userSchema=new mongoose.Schema({
         required:true,
         unique:true,
     },
-    followers:[
+    connections:[
      {
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         default:[],
      }
     ],
-    following:[
+    subscribedTo:[
         {
            type:mongoose.Schema.Types.ObjectId,
            ref:"User",
@@ -57,6 +75,22 @@ const userSchema=new mongoose.Schema({
         default:[]
        }
     ],
+    assignedMentor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    assignedMentorChatId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'MentorshipChat' 
+    },
+      assignedMentees: [{
+         type: mongoose.Schema.Types.ObjectId,
+         ref: "User",
+         default: [],
+       }],
+   
+
 },{timestamps:true}
 );
 const User=mongoose.model("User",userSchema);

@@ -9,7 +9,7 @@ import { QueryClient, useMutation,useQuery, useQueryClient } from "@tanstack/rea
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 import { formatPostDate } from "../../utils/date";
-import { useAuth } from "../../../authContext";
+import { useAuth } from "../../Context/AuthContext";
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	//const{data:authUser}=useQuery({
@@ -59,18 +59,28 @@ const Post = ({ post }) => {
 				throw new Error(error);
 			}
 		},
-		onSuccess:(updatedLikes)=>{
-			//not a good UX because it refetch all posts
-			//queryClient.invalidateQueries({queryKey:["posts"]});
-			queryClient.setQueryData(["posts"],(oldData)=>{
-				return oldData.map(p=>{
-					if(p._id ===post._id){
-						return {...p,likes:updatedLikes}
-					}
-					return p;
-				})
-			})
+		// onSuccess:(updatedLikes)=>{
+		// 	//not a good UX because it refetch all posts
+		// 	//queryClient.invalidateQueries({queryKey:["posts"]});
+		// 	queryClient.setQueryData(["posts"],(oldData)=>{
+		// 		return oldData.map((p)=>{
+		// 			if(p._id ===post._id){
+		// 				return {...p,likes:updatedLikes}
+		// 			}
+		// 			return p;
+		// 		})
+		// 	})
+		// },
+		onSuccess: (updatedPost) => {
+			queryClient.setQueryData(["posts"], (oldData) => {
+				if (!oldData) return [];
+		
+				return oldData.map((p) => 
+					p._id === updatedPost._id ? updatedPost : p
+				);
+			});
 		},
+		
 		onError:(error)=>{
       toast.error(error.message);
 		}

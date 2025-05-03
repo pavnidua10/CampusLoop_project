@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import XSvg from "../../../components/svgs/X";
+import CampusLoopLogo from "../../../logo/CampusLoop.png";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
@@ -56,12 +56,12 @@ const LoginPage = () => {
 	return (
 		<div className='max-w-screen-xl mx-auto flex h-screen'>
 			<div className='flex-1 hidden lg:flex items-center  justify-center'>
-				<XSvg className='lg:w-2/3 fill-white' />
+				<img src={CampusLoopLogo} alt="Campus Loop Logo" className="w-120 mb-4" />
 			</div>
 			<div className='flex-1 flex flex-col justify-center items-center'>
 				<form className='flex gap-4 flex-col' onSubmit={handleSubmit}>
-					<XSvg className='w-24 lg:hidden fill-white' />
-					<h1 className='text-4xl font-extrabold text-white'>{"Let's"} go.</h1>
+					
+					<h1 className='text-4xl font-extrabold text-white'>Welcome Back!</h1>
 					<label className='input input-bordered rounded flex items-center gap-2'>
 						<MdOutlineMail />
 						<input

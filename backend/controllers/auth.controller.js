@@ -3,14 +3,25 @@ import User from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 export const signup=async(req,res)=>{
     try{
-       const{fullName,username,email,password}=req.body;
+       const{fullName,username,email,password,collegeName,course,batchYear,userRole,isAvailableForMentorship}=req.body;
+       if (
+        !fullName ||
+        !username ||
+        !email ||
+        !password ||
+        !collegeName ||
+        !course ||
+        !batchYear
+      ) {
+        return res.status(400).json({ error: "Please fill all required fields." });
+      }
        const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
        if(!emailRegex.test(email)){
         return res.status(400).json({error:"invalid email format"});
 
        }
-       const existingUser=await User.findOne({username});
-       if(existingUser){
+       const existingUsername=await User.findOne({username});
+       if(existingUsername){
         return res.status(400).json({error:"username is already taken"});
        }
        const existingEmail=await User.findOne({email});
@@ -18,15 +29,20 @@ export const signup=async(req,res)=>{
         return res.status(400).json({error:"email is already taken"});
        }
        if(password.length<6){
-        return res.send(400).json({error:"password must contain at least 6 characters"});
+        return res.status(400).json({error:"password must contain at least 6 characters"});
        }
        const salt=await bcrypt.genSalt(10);
-       const hashedpassword=await bcrypt.hash(password,salt);
+       const hashedPassword=await bcrypt.hash(password,salt);
        const newUser=new User({
          fullName,
          username,
          email,
-         password:hashedpassword,
+         password:hashedPassword,
+         collegeName,
+         course,
+         batchYear,
+        userRole,
+        isAvailableForMentorship
        })
        if(newUser){
         generateTokenAndSetCookie(newUser._id,res)
@@ -36,8 +52,8 @@ export const signup=async(req,res)=>{
             fullName:newUser.fullName,
             username:newUser.username,
             email:newUser.email,
-            followers:newUser.followers,
-            following:newUser.following,
+            connections:newUser.connections,
+            subscribedTo:newUser.subscribedTo,
             profileImg:newUser.profileImg,
             coverImg:newUser.coverImg,
         })
@@ -52,7 +68,7 @@ export const signup=async(req,res)=>{
 export const login=async(req,res)=>{
     try{
       const{username,password}=req.body;
-      const user=await User.findOne({username});
+      const user=await User.findOne({username})
       const isPasswordCorrect=await bcrypt.compare(password,user?.password||"")
 
       if(!user|| !isPasswordCorrect){
@@ -64,8 +80,8 @@ export const login=async(req,res)=>{
           fullName:user.fullName,
           username:user.username,
           email:user.email,
-          followers:user.followers,
-          following:user.following,
+          connections:user.connections,
+          subscribedTo:user.subscribedTo,
           profileImg:user.profileImg,
           coverImg:user.coverImg,
       })
@@ -83,12 +99,33 @@ export const logout=async(req,res)=>{
     res.status(500).json({error:"internal server error"});
   }
 };
-export const getMe=async(req,res)=> {
-    try{
-       const user=await User.findById(req.user._id).select("-password");
-       res.status(200).json(user);
-    }catch(error){
-        console.log("error in getMe controller",error.message);
-        return res.status(500).json({error:"internal server error"});
-    }
-}
+
+
+// export const getMe = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.user.userId).select('-password');
+//     if (!user) return res.status(404).json({ message: 'User not found' });
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: "7d"
+//     });
+
+//     res.status(200).json(user);
+//   } catch (err) {
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
+export const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error("Error in getMe:", err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
