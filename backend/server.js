@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 import http from "http";
 import { Server } from "socket.io";
+import cors from "cors";
 
 import connectMongoDB from "./db/connectMongoDB.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -32,7 +33,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: [process.env.CLIENT_URL || 'http://localhost:3000','https://campusloop-project.onrender.com/'],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -44,7 +45,12 @@ const __dirname = path.resolve();
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.use(
+  cors({
+    origin:[ process.env.CLIENT_URL || "http://localhost:3000","https://campusloop-project.onrender.com"],
+    credentials: true,
+  })
+);
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);

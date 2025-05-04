@@ -33,32 +33,7 @@ const RightPanel = () => {
     retry: false,
   });
 
-  const { mutate: logout } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch("/api/auth/logout", {
-          method: "POST",
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Something went wrong");
-        }
-      } catch (error) {
-        throw new Error(error.message || "Logout failed");
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-	  setUser(null); 
-	  queryClient.clear(); // clear all cache
-	  window.location.href = "/login";
-    },
-    onError: () => {
-      toast.error("Logout failed");
-    },
-  });
-
+ 
   if (isError) {
     return (
       <div className="hidden lg:block my-4 mx-2 w-72">
@@ -128,36 +103,7 @@ const RightPanel = () => {
         </div>
       </div>
 
-      {user && (
-        <div className="mt-4 p-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 text-white flex items-center justify-between">
-          <Link
-            to={`/profile/${user.username}`}
-            className="flex gap-2 items-center"
-          >
-            <div className="avatar">
-              <div className="w-8 rounded-full">
-                <img
-                  src={user.profileImg || "/avatar-placeholder.png"}
-                  alt="Profile"
-                />
-              </div>
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm w-20 truncate">
-                {user.fullName}
-              </p>
-              <p className="text-slate-500 text-sm">@{user.username}</p>
-            </div>
-          </Link>
-          <BiLogOut
-            className="w-5 h-5 cursor-pointer hover:text-red-400"
-            onClick={(e) => {
-              e.preventDefault();
-              logout();
-            }}
-          />
-        </div>
-      )}
+     
     </div>
   );
 };

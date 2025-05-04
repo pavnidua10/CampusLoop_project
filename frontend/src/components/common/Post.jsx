@@ -44,6 +44,7 @@ const Post = ({ post }) => {
 			queryClient.invalidateQueries({queryKey:["posts"]});
 		}
 	})
+	
 	const {mutate:likePost,isPending:isLiking}=useMutation({
 		mutationFn:async()=>{
 			try{
@@ -59,24 +60,18 @@ const Post = ({ post }) => {
 				throw new Error(error);
 			}
 		},
-		// onSuccess:(updatedLikes)=>{
-		// 	//not a good UX because it refetch all posts
-		// 	//queryClient.invalidateQueries({queryKey:["posts"]});
-		// 	queryClient.setQueryData(["posts"],(oldData)=>{
-		// 		return oldData.map((p)=>{
-		// 			if(p._id ===post._id){
-		// 				return {...p,likes:updatedLikes}
-		// 			}
-		// 			return p;
-		// 		})
-		// 	})
-		// },
-		onSuccess: (updatedPost) => {
+	
+		onSuccess: (updatedLikes) => {
 			queryClient.setQueryData(["posts"], (oldData) => {
 				if (!oldData) return [];
 		
-				return oldData.map((p) => 
-					p._id === updatedPost._id ? updatedPost : p
+				return oldData.map((p) => {
+					if(p._id===post._id){
+						return{...p,likes:updatedLikes};
+					}
+					return p;
+				}
+					
 				);
 			});
 		},
@@ -85,6 +80,7 @@ const Post = ({ post }) => {
       toast.error(error.message);
 		}
 	})
+	
 	const {mutate:commentPost,isPending:isCommenting}=useMutation({
 		mutationFn:async()=>{
 			try{
@@ -220,7 +216,7 @@ const Post = ({ post }) => {
 											onChange={(e) => setComment(e.target.value)}
 										/>
 										<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-											{isCommenting ? <LoadingSpinner size="md" /> :Post}
+											{isCommenting ? <LoadingSpinner size="md" /> :Post}POST
 										</button>
 									</form>
 								</div>
@@ -238,13 +234,11 @@ const Post = ({ post }) => {
 								)}
 								{isLiked && !isLiking && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
-								<span
-									className={`text-sm  group-hover:text-pink-500 ${
-										isLiked ? "text-pink-500" : "text-slate-500"
-									}`}
-								>
-									{post.likes.length}
-								</span>
+								<span className={`transition-all duration-150 text-sm ${isLiked ? "text-pink-500 scale-110" : "text-slate-500"}`}>
+  {post.likes.length}
+</span>
+
+								
 							</div>
 						</div>
 						<div className='flex w-1/3 justify-end gap-2 items-center'>
