@@ -4,7 +4,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL||"http://localhost:5000");
+const socket = io(import.meta.env.VITE_BACKEND_URL);
 
 const ChatPage = () => {
   const { token, userId } = useAuth(); // Use userId from context
