@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import io from "socket.io-client";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL);
+const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com");
 
 const MenteeChat = ({ mentee, chatId }) => {
   const { user } = useAuth();
