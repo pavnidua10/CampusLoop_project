@@ -9,7 +9,7 @@ import { FaUser } from "react-icons/fa";
 import { MdDriveFileRenameOutline } from "react-icons/md";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
-
+import { API_URL } from "../../../config";
 // Reusable custom styles
 const customStyles = {
   control: (provided) => ({
@@ -59,7 +59,7 @@ const SignUpPage = () => {
   const queryClient = useQueryClient();
   const { mutate, isError, isPending, error } = useMutation({
     mutationFn: async (formData) => {
-      const res = await fetch("/api/auth/signup", {
+      const res = await fetch(`${API_URL}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

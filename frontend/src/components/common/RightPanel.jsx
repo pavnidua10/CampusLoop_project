@@ -8,6 +8,7 @@ import { useAuth } from "../../Context/AuthContext";
 import LoadingSpinner from "./LoadingSpinner";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import useFollow from "../../hooks/useFollow";
+import { API_URL } from "../../config";
 
 const RightPanel = () => {
   const queryClient = useQueryClient();
@@ -18,7 +19,7 @@ const RightPanel = () => {
     queryKey: ["suggestedUsers"],
     queryFn: async () => {
       try {
-        const res = await fetch("/api/users/suggested");
+        const res = await fetch(`${API_URL}/api/users/suggested`);
         const data = await res.json();
 
         if (!res.ok) {

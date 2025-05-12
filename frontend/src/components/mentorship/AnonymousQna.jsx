@@ -1,6 +1,7 @@
-// frontend/pages/MenteeAnonymousQna.jsx
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
+import { API_URL } from "../../config";
 
 const AnonymousQna = () => {
   const { user } = useAuth();
@@ -9,10 +10,10 @@ const AnonymousQna = () => {
   const [myQuestions, setMyQuestions] = useState([]);
   const [activeTab, setActiveTab] = useState("ask");
 
-  // Fetch previously asked questions
+ 
   const fetchMyQuestions = async () => {
     try {
-      const res = await fetch("/api/qna/my-questions", {
+      const res = await fetch(`${API_URL}/api/qna/my-questions`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -35,7 +36,7 @@ const AnonymousQna = () => {
     if (!newQuestion.trim()) return;
 
     try {
-      const res = await fetch("/api/qna/ask", {
+      const res = await fetch(`${API_URL}/api/qna/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

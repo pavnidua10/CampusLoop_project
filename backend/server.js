@@ -20,6 +20,7 @@ import assignMentorRoutes from "./routes/assignedMentor.routes.js";
 import MentorshipMessage from "./models/mentorshipMessage.model.js"; 
 import AnonymousQna from "./routes/AnonymousQna.routes.js"
 import mentorDashboardRoutes from "./routes/mentorDashboard.routes.js"
+import UserChat from "./models/userChat.model.js"; // <--- ADD THIS
 
 dotenv.config({ path: './backend/.env' });
 
@@ -29,17 +30,22 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'https://campusloop-project.onrender.com'
+];
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [process.env.CLIENT_URL || 'http://localhost:3000','https://campusloop-project.onrender.com/'],
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const __dirname = path.resolve();
 
 app.use(express.json({ limit: "5mb" }));
@@ -47,10 +53,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin:[ process.env.CLIENT_URL || "http://localhost:3000","https://campusloop-project.onrender.com"],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -83,9 +90,9 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} connected: ${socket.id}`);
   });
 
-  socket.on("join-chat", (chatId) => {
+  socket.on("join chat", (chatId) => { // <--- Match event name with frontend!
     socket.join(chatId);
-    console.log(`User joined mentorship chat room: ${chatId}`);
+    console.log(`User joined chat room: ${chatId}`);
   });
 
   socket.on("send-mentorship-message", async ({ chatId, message, senderId }) => {
@@ -108,38 +115,29 @@ io.on("connection", (socket) => {
     }
   });
 
-
   socket.on("send-normal-message", async ({ chatId, message, senderId }) => {
     try {
       const chat = await UserChat.findById(chatId);
-  
       if (!chat) {
         console.log(`Chat ${chatId} not found`);
         return;
       }
-  
       const newMessage = {
-        sender: senderId, // Use senderId from the client
-        content: message, // Use message content from the client
+        sender: senderId, 
+        content: message, 
       };
-  
       chat.messages.push(newMessage);
       await chat.save();
-  
-      // Populate the sender field before emitting
       await chat.populate("messages.sender", "fullName username");
-  
       const savedMessage = chat.messages[chat.messages.length - 1];
-  
       io.to(chatId).emit("receive-normal-message", {
         chatId: chatId,
-        message: savedMessage, // Send the entire message object
+        message: savedMessage,
       });
     } catch (error) {
       console.error("Error saving normal message:", error.message);
     }
   });
-  
 
   socket.on("disconnect", () => {
     const disconnectedUser = Object.keys(onlineUsers).find(
@@ -148,9 +146,7 @@ io.on("connection", (socket) => {
     if (disconnectedUser) {
       delete onlineUsers[disconnectedUser];
       console.log(`User ${disconnectedUser} disconnected`);
-
-      // Optionally: Leave the room on disconnect
-      socket.leaveAll();  // Will ensure that the socket leaves all rooms it joined.
+      socket.leaveAll();  
     }
   });
 });

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-
+import { API_URL } from "./../config";
 const authContext = createContext(null);
 
 export const useAuth = () => useContext(authContext);
@@ -13,7 +13,7 @@ export const AuthContextProvider = ({ children }) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ["authUser"],
     queryFn: async () => {
-      const res = await fetch("/api/auth/me", {
+      const res = await fetch(`${API_URL}/api/auth/me`, {
         credentials: "include",
       });
       if (!res.ok) {

@@ -3,6 +3,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { FaUser } from "react-icons/fa";
 import MenteeChat from "./MenteeChat";
+import { API_URL } from "../../config";
 
 const MentorChatInterface = ({ mentorId }) => {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ const MentorChatInterface = ({ mentorId }) => {
   const { data: mentees, isLoading, error } = useQuery({
     queryKey: ["mentees", mentorId],
     queryFn: async () => {
-      const res = await fetch(`/api/mentor/${mentorId}/mentees`);
+      const res = await fetch(`${API_URL}/api/mentor/${mentorId}/mentees`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load mentees");
       return data.mentees;
@@ -27,15 +28,15 @@ const MentorChatInterface = ({ mentorId }) => {
         console.log("User not loaded or missing _id");
         return;
       }
-      const res = await fetch("/api/mentorship-chats/access", {
+      const res = await fetch(`${API_URL}/api/mentorship-chats/access`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,  // Send the token
+          Authorization: `Bearer ${user.token}`,  
         },
         body: JSON.stringify({
-          mentorId: user._id,  // Mentor's ID
-          menteeId: mentee._id,  // Mentee's ID
+          mentorId: user._id,  
+          menteeId: mentee._id,  
         }),
       });
   

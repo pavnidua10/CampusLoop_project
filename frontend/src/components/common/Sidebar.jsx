@@ -13,6 +13,7 @@ import { BsChatDots } from "react-icons/bs";
 import { PiStudentDuotone } from "react-icons/pi";
 import { BiLogOut } from "react-icons/bi";
 import { useAuth } from "../../Context/AuthContext";
+import { API_URL } from "../../config";
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
@@ -20,7 +21,7 @@ const Sidebar = () => {
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/auth/logout", { method: "POST" });
+      const res = await fetch(`${API_URL}/api/auth/logout`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Logout failed");
     },

@@ -1,60 +1,7 @@
-// import React, { useEffect, useState } from "react";
 
-// const MentorDashboard = ({ mentorId }) => {
-//   const [mentees, setMentees] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchMentees = async () => {
-//       try {
-//         if (!mentorId) return;
-//         const res = await fetch(`/api/mentor/${mentorId}/mentees`);
-//         const data = await res.json();
-//         setMentees(data.mentees);
-//       } catch (err) {
-//         console.error("Failed to fetch mentees", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchMentees();
-//   }, [mentorId]);
-
-//   if (loading) return <p>Loading...</p>;
-
-//   return (
-//     <div className="p-4">
-//       <h2 className="text-2xl font-bold mb-4">Your Mentees</h2>
-//       {mentees.length === 0 ? (
-//         <p>No mentees assigned yet.</p>
-//       ) : (
-//         <ul className="grid gap-4">
-//           {mentees.map((mentee) => (
-//             <li key={mentee._id} className="bg-white shadow-md p-4 rounded-xl">
-//               <div className="flex items-center gap-4">
-//                 <img
-//                   src={mentee.profileImg ||"/avatar-placeholder.png" }
-//                   alt="mentee"
-//                   className="w-12 h-12 rounded-full"
-//                 />
-//                 <div>
-//                   <h3 className="text-lg  text-black font-semibold">{mentee.fullName}</h3>
-//                   <p className="text-sm text-gray-500">@{mentee.username}</p>
-//                   <p className="text-sm mt-1">{mentee.bio}</p>
-//                 </div>
-//               </div>
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default MentorDashboard;
 
 import React, { useEffect, useState } from "react";
+import { API_URL } from "../../config";
 
 const MentorDashboard = ({ mentorId }) => {
   const [mentees, setMentees] = useState([]);
@@ -66,7 +13,7 @@ const MentorDashboard = ({ mentorId }) => {
     const fetchMentees = async () => {
       try {
         if (!mentorId) return;
-        const res = await fetch(`/api/mentor/${mentorId}/mentees`);
+        const res = await fetch(`${API_URL}/api/mentor/${mentorId}/mentees`);
         const data = await res.json();
         setMentees(data.mentees);
       } catch (err) {
@@ -100,7 +47,7 @@ const MentorDashboard = ({ mentorId }) => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("/api/mentorResources/upload-resource", {
+      const res = await fetch(`${API_URL}/api/mentorResources/upload-resource`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,

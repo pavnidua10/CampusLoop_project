@@ -3,8 +3,9 @@ import { useAuth } from "../../Context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import io from "socket.io-client";
+import { API_URL } from "../../config";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com");
+const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com"|| "http://localhost:10000");
 
 const MentorshipChatInterface = () => {
   const { user } = useAuth();
@@ -50,7 +51,7 @@ const MentorshipChatInterface = () => {
       if (!user?.username) return;
 
       try {
-        const res = await fetch(`/api/users/profile/${user.username}`);
+        const res = await fetch(`${API_URL}/api/users/profile/${user.username}`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.error || "Failed to fetch mentor");
@@ -68,7 +69,7 @@ const MentorshipChatInterface = () => {
   const { data: chatMessages, refetch } = useQuery({
     queryKey: ["mentorshipChatMessages", id],
     queryFn: async () => {
-      const res = await fetch(`/api/mentorship-chats/messages/${id}`);
+      const res = await fetch(`${API_URL}/api/mentorship-chats/messages/${id}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to fetch messages");
       return data;
@@ -85,7 +86,7 @@ const MentorshipChatInterface = () => {
     if (!message.trim() || !mentorProfile?.username) return;
 
     try {
-      const res = await fetch("/api/mentorship-chats/message", {
+      const res = await fetch(`${API_URL}/api/mentorship-chats/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

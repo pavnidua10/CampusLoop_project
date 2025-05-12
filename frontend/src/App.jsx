@@ -4,6 +4,7 @@ import { AuthContextProvider ,useAuth} from "./Context/AuthContext";
 import { ChatContextProvider } from './Context/ChatContext';
 import { Toaster } from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
+import { API_URL } from "./config";
 
 import HomePage from "./pages/home/homePage";
 import SignUpPage from "./pages/auth/signup/signUpPage";
@@ -22,7 +23,7 @@ function App() {
 		queryKey: ["authUser"],
 		queryFn: async () => {
 			try {
-				const res = await fetch("/api/auth/me",{
+				const res = await fetch(`${API_URL}/api/auth/me`,{
 					credentials:"include",
 				});
 				const data = await res.json();

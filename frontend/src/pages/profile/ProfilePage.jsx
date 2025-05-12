@@ -5,7 +5,7 @@ import Posts from "../../components/common/Posts";
 import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkeleton";
 import EditProfileModal from "./EditProfileModal";
 import { POSTS } from "../../utils/db/dummy";
-
+import { API_URL } from "../../config";
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
@@ -36,7 +36,7 @@ const ProfilePage = () => {
 				if (!username) {
 					console.error("No username found in URL");
 				}
-				const res = await fetch(`/api/users/profile/${username}`);
+				const res = await fetch(`${API_URL}/api/users/profile/${username}`);
 				const data = await res.json();
 				console.log(data)
 				if (!res.ok) {
@@ -145,7 +145,7 @@ const ProfilePage = () => {
 			<button
 	onClick={async () => {
 		try {
-			const res = await fetch("/api/message/access-chat", {
+			const res = await fetch(`${API_URL}/api/message/access-chat`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

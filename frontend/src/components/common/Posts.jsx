@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 const Posts = ({ feedType, username, userId, college, course, isMentor }) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Use prop values if available, otherwise fallback to user data from localStorage
+
   const collegeValue = college || user?.college;
   const courseValue = course || user?.course;
 
@@ -43,7 +43,7 @@ const Posts = ({ feedType, username, userId, college, course, isMentor }) => {
       }
       return data;
     },
-    enabled: !!POST_ENDPOINT, // Only run query if endpoint is valid
+    enabled: !!POST_ENDPOINT, 
   });
 
   useEffect(() => {

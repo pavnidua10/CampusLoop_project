@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { API_URL } from "../../../config";
 import CampusLoopLogo from "../../../logo/CampusLoop.png";
 
 import { MdOutlineMail } from "react-icons/md";
@@ -18,7 +18,7 @@ const LoginPage = () => {
 	const{mutate:loginMutation,isError,isPending,error}=useMutation({
 		mutationFn:async({username,password})=>{
 			try{
-              const res=await fetch("/api/auth/login",{
+              const res=await fetch(`${API_URL}/api/auth/login`,{
 				method:"POST",
 				headers:{
 					"Content-Type":"application/json",

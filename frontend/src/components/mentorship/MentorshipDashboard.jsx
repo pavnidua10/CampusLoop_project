@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
-
+import { API_URL } from "../../config";
 const MentorshipDashboard = () => {
   const { chatId } = useParams();
   const { token, _id } = useAuth();
@@ -13,7 +13,7 @@ const MentorshipDashboard = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await fetch("/api/mentorship/messages", {
+        const res = await fetch(`${API_URL}/api/mentorship/messages`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -33,7 +33,7 @@ const MentorshipDashboard = () => {
 
     const fetchResources = async () => { // Added resource fetch function
       try {
-        const res = await fetch("/api/mentorResources/resources", {
+        const res = await fetch(`${API_URL}/api/mentorResources/resources`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -60,7 +60,7 @@ const MentorshipDashboard = () => {
     if (!messageInput.trim()) return;
 
     try {
-      const res = await fetch("/api/messages", {
+      const res = await fetch(`${API_URL}/api/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

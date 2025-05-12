@@ -1,6 +1,7 @@
-// frontend/pages/MentorAnonymousQna.jsx
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
+import { API_URL } from "../../config";
 
 const MentorQna = () => {
   const { user } = useAuth();
@@ -11,7 +12,7 @@ const MentorQna = () => {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await fetch("/api/qna/questions", {
+        const res = await fetch(`${API_URL}/api/qna/questions`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },
@@ -28,7 +29,7 @@ const MentorQna = () => {
 
   const handleSubmitAnswer = async () => {
     try {
-      const res = await fetch("/api/qna/answer", {
+      const res = await fetch(`${API_URL}/api/qna/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

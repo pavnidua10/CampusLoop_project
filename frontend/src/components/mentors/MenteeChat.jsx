@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import io from "socket.io-client";
+import { API_URL } from "../../config";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com");
+const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com"|| "http://localhost:10000");
 
 const MenteeChat = ({ mentee, chatId }) => {
   const { user } = useAuth();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [isSending, setIsSending] = useState(false); // State to prevent sending duplicates
+  const [isSending, setIsSending] = useState(false); 
 
-  // ✅ Join Socket room
+  
   useEffect(() => {
     if (!chatId || !user?._id) return;
 
@@ -23,7 +24,7 @@ const MenteeChat = ({ mentee, chatId }) => {
     };
   }, [chatId, user?._id]);
 
-  // ✅ Listen for real-time messages
+ 
   useEffect(() => {
     const handleReceiveMessage = (newMsg) => {
       const formattedMsg = {
@@ -34,7 +35,7 @@ const MenteeChat = ({ mentee, chatId }) => {
             : newMsg.sender,
       };
 
-      // Only add message if it's not the one we just sent
+  
       if (newMsg.sender?._id !== user._id) {
         setMessages((prev) => [...prev, formattedMsg]);
       }
@@ -47,11 +48,10 @@ const MenteeChat = ({ mentee, chatId }) => {
     };
   }, [user._id]);
 
-  // ✅ Fetch chat history
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`/api/mentorship-chats/messages/${chatId}`);
+        const res = await fetch(`${API_URL}/api/mentorship-chats/messages/${chatId}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load messages");
 
@@ -64,14 +64,14 @@ const MenteeChat = ({ mentee, chatId }) => {
     if (chatId) fetchMessages();
   }, [chatId]);
 
-  // ✅ Send message
-  const handleSendMessage = async () => {
-    if (!message.trim() || isSending) return; // Prevent sending duplicate messages
 
-    setIsSending(true); // Set sending state to true
+  const handleSendMessage = async () => {
+    if (!message.trim() || isSending) return;
+
+    setIsSending(true); 
 
     try {
-      const res = await fetch("/api/mentorship-chats/message", {
+      const res = await fetch(`${API_URL}/api/mentorship-chats/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,23 +85,22 @@ const MenteeChat = ({ mentee, chatId }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Send message failed");
 
-      // After the message is successfully saved, emit to Socket.IO
+
       socket.emit("send-mentorship-message", {
         chatId,
         message: data.message.text,
         senderId: user._id,
       });
 
-      // Optimistically add the message to the chat
       setMessages((prev) => [
         ...prev,
         { ...data.message, sender: { _id: user._id } },
       ]);
-      setMessage(""); // Reset message input
+      setMessage(""); 
     } catch (error) {
       console.error("Send message error:", error.message);
     } finally {
-      setIsSending(false); // Reset sending state after the process is done
+      setIsSending(false); 
     }
   };
 
@@ -111,7 +110,6 @@ const MenteeChat = ({ mentee, chatId }) => {
         Chat with {mentee.fullName}
       </h2>
 
-      {/* Chat Display */}
       <div className="flex-1 overflow-y-auto px-4 py-2 bg-white rounded-2xl border shadow-lg h-[500px]"> {/* Increased height here */}
         {messages.length === 0 ? (
           <p className="text-center text-gray-400">No messages yet</p>

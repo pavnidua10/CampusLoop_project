@@ -13,7 +13,7 @@ export const ChatContextProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       // Initialize socket connection when user is available
-      const socketInstance = io("http://localhost:5000", { withCredentials: true });
+      const socketInstance = io("http://localhost:10000", { withCredentials: true });
       setSocket(socketInstance);
 
       socketInstance.emit("join", user._id); // Join chat room with user ID
