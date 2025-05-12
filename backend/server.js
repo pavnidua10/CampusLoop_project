@@ -20,7 +20,7 @@ import assignMentorRoutes from "./routes/assignedMentor.routes.js";
 import MentorshipMessage from "./models/mentorshipMessage.model.js"; 
 import AnonymousQna from "./routes/AnonymousQna.routes.js"
 import mentorDashboardRoutes from "./routes/mentorDashboard.routes.js"
-import UserChat from "./models/userChat.model.js"; // <--- ADD THIS
+
 
 dotenv.config({ path: './backend/.env' });
 
@@ -90,7 +90,7 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} connected: ${socket.id}`);
   });
 
-  socket.on("join chat", (chatId) => { // <--- Match event name with frontend!
+  socket.on("join chat", (chatId) => { 
     socket.join(chatId);
     console.log(`User joined chat room: ${chatId}`);
   });
