@@ -2,15 +2,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import CampusLoopLogo from "../../logo/CampusLoop.png";
-import {
-  MdHomeFilled,
-  IoNotifications,
-  IoSearch,
-  FaUser,
-  BsChatDots,
-  PiStudentDuotone,
-  BiLogOut,
-} from "react-icons/all"; 
+import { MdHomeFilled } from "react-icons/md";
+import { IoNotifications, IoSearch } from "react-icons/io5";
+import { FaUser } from "react-icons/fa";
+import { BsChatDots } from "react-icons/bs";
+import { PiStudentDuotone } from "react-icons/pi";
+import { BiLogOut } from "react-icons/bi";
+
 
 import { useAuth } from "../../Context/AuthContext";
 import { API_URL } from "../../config";
