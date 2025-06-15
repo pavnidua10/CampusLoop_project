@@ -56,7 +56,7 @@ const MentorshipPage = () => {
   
 
   if (isUserLoading) return <p>Loading your mentorship data...</p>;
- 
+  
   if (userError) return <p>Error: {userError.message}</p>;
   if (!userProfile) return <p>No user profile found.</p>;
   console.log("Mentor Chat ID (whole):", userProfile.assignedMentorChatId);
