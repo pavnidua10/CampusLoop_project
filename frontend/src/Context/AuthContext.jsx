@@ -27,7 +27,7 @@ export const AuthContextProvider = ({ children }) => {
   useEffect(() => {
     if (data) {
       setUser(data);
-      setToken(data.token);  // If your backend sends a token
+      setToken(data.token); 
       setUserId(data._id);
       console.log("✅ Auth user set:", data);
     }

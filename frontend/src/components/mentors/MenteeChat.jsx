@@ -3,7 +3,7 @@ import { useAuth } from "../../Context/AuthContext";
 import io from "socket.io-client";
 import { API_URL } from "../../config";
 
-const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com"|| "http://localhost:10000");
+const socket = io(import.meta.env.VITE_BACKEND_URL||"https://campusloop-project.onrender.com"|| "http://localhost:5000");
 
 const MenteeChat = ({ mentee, chatId }) => {
   const { user } = useAuth();

@@ -71,7 +71,8 @@ const ProfilePage = () => {
 	}, [username, refetch]);
 
 	return (
-		<div className='flex-[4_4_0] border-r border-gray-700 min-h-screen'>
+		<div className='flex-[4_4_0] border-r border-gray-700 min-h-screen px-2 sm:px-4'>
+
 			{(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
 			{!isLoading && !isRefetching && !user && (
 				<p className='text-center text-lg mt-4'>User not found</p>
@@ -89,7 +90,7 @@ const ProfilePage = () => {
 						</div>
 					</div>
 
-					<div className='relative group/cover'>
+					<div className='relative group/cover overflow-hidden rounded-md mx-4 mt-2'>
 						<img
 							src={coverImg || user?.coverImg || "/cover.png"}
 							className='h-52 w-full object-cover'

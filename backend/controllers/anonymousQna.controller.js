@@ -5,7 +5,7 @@ export const askQuestion = async (req, res) => {
   try {
     const newQuestion = await QnA.create({
       question,
-      askedBy: req.user._id, // user is set via middleware
+      askedBy: req.user._id,
     });
     res.status(200).json(newQuestion);
   } catch (error) {
@@ -14,12 +14,12 @@ export const askQuestion = async (req, res) => {
   }
 };
 
-// Get all questions (Mentor View)
+
 export const getQuestions = async (req, res) => {
   try {
     const questions = await QnA.find({ answeredBy: null })
       .populate("askedBy", "fullName")
-      .sort({ createdAt: -1 }); // Show latest questions first
+      .sort({ createdAt: -1 }); 
     res.status(200).json(questions);
   } catch (error) {
     console.error("Error in fetching questions:", error);
@@ -52,7 +52,7 @@ export const answerQuestion = async (req, res) => {
   }
 };
 
-// Mentee sees their asked questions and received answers
+
 export const getMyQna = async (req, res) => {
   try {
     const myQuestions = await QnA.find({ askedBy: req.user._id }).sort({ createdAt: -1 });

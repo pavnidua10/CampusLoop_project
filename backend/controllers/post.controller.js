@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
-// Create Post
+
 export const createPost = async (req, res) => {
   try {
     const { text, img } = req.body;

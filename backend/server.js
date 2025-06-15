@@ -58,7 +58,6 @@ app.use(
   })
 );
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
@@ -71,7 +70,6 @@ app.use("/api/mentor", assignMentorRoutes);
 app.use("/api/qna",AnonymousQna)
 app.use("/api/mentorResources", mentorDashboardRoutes);
 
-// Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "/frontend/dist")));
   app.get("*", (req, res) => {
@@ -79,7 +77,6 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// SOCKET LOGIC
 let onlineUsers = {};
 
 io.on("connection", (socket) => {

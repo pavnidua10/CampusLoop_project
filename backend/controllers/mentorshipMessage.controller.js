@@ -3,7 +3,7 @@ import MentorshipMessage from "../models/mentorshipMessage.model.js";
 
   export const sendMessage = async (req, res) => {
     const { chatId, message } = req.body;
-    const senderId = req.user._id; // auto from token
+    const senderId = req.user._id; 
     console.log("Incoming message body:", req.body);
   
     if (!message || !chatId) {
