@@ -26,7 +26,7 @@ const HomePage = () => {
         md:mr-auto
         border-r border-gray-700
         min-h-screen
-        bg-black
+        bg-gray-900
         px-2
         md:px-8
         pb-4
@@ -38,7 +38,7 @@ const HomePage = () => {
         className="
           flex w-full overflow-x-auto border-b border-gray-700
           scrollbar-thin scrollbar-thumb-gray-700
-          bg-black
+          bg-gray-900
         "
       >
         {tabs.map((tab) => (

@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import CampusLoopLogo from "../../logo/CampusLoop.png";
-import { MdHomeFilled } from "react-icons/md";
-import { IoNotifications } from "react-icons/io5";
-import { IoSearch } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
-import { BsChatDots } from "react-icons/bs";
-import { PiStudentDuotone } from "react-icons/pi";
-import { BiLogOut } from "react-icons/bi";
+import {
+  MdHomeFilled,
+  IoNotifications,
+  IoSearch,
+  FaUser,
+  BsChatDots,
+  PiStudentDuotone,
+  BiLogOut,
+} from "react-icons/all"; 
+
 import { useAuth } from "../../Context/AuthContext";
 import { API_URL } from "../../config";
 
@@ -26,104 +28,71 @@ const Sidebar = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["authUser"] });
       setUser(null);
-      queryClient.clear(); // clear all cache
-	  window.location.href = "/login";
+      queryClient.clear();
+      window.location.href = "/login";
       toast.success("Logged out");
     },
     onError: () => toast.error("Logout failed"),
   });
 
   return (
-    <div className='md:flex-[2_2_0] w-18 max-w-52'>
-      <div className='sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full'>
-        <Link to='/' className='flex justify-center md:justify-start'>
-          <img src={CampusLoopLogo} alt='Campus Loop Logo' className='w-60 mb-4' />
+    <div className="h-full w-full px-4 py-6">
+      <div className="flex flex-col items-start space-y-6">
+      
+        <Link to="/" className="w-full flex justify-center md:justify-start">
+          <img
+            src={CampusLoopLogo}
+            alt="Campus Loop Logo"
+            className="w-44 md:w-60 object-contain"
+          />
         </Link>
 
-       
+  
+        <nav className="w-full space-y-3">
+          <SidebarItem to="/" icon={<MdHomeFilled />} label="Home" />
+          <SidebarItem to="/search" icon={<IoSearch />} label="Search" />
+          <SidebarItem to="/notifications" icon={<IoNotifications />} label="Notifications" />
+          <SidebarItem to="/chat" icon={<BsChatDots />} label="Chat" />
 
-        <ul className='flex flex-col gap-3 mt-4'>
-          <li className='flex justify-center md:justify-start'>
-            <Link
-              to='/'
-              className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-            >
-              <MdHomeFilled className='w-8 h-8' />
-              <span className='text-lg hidden md:block'>Home</span>
-            </Link>
-          </li>
-          <li className='flex justify-center md:justify-start'>
-  <Link
-    to='/search'
-    className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-  >
-    <IoSearch className='w-6 h-6' />
-    <span className='text-lg hidden md:block'>Search</span>
-  </Link>
-</li>
-
-          <li className='flex justify-center md:justify-start'>
-            <Link
-              to='/notifications'
-              className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-            >
-              <IoNotifications className='w-6 h-6' />
-              <span className='text-lg hidden md:block'>Notifications</span>
-            </Link>
-          </li>
-        
-          <li className='flex justify-center md:justify-start'>
-            <Link
-              to='/chat'
-              className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-            >
-              <BsChatDots className='w-6 h-6' />
-              <span className='text-lg hidden md:block'>Chat</span>
-            </Link>
-          </li>
           {user?.isAvailableForMentorship ? (
-            <li className='flex justify-center md:justify-start'>
-              <Link
-                to={`/mentor/${user._id}`}
-                className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-              >
-                <PiStudentDuotone className='w-6 h-6' />
-                <span className='text-lg hidden md:block'>Mentor Page</span>
-              </Link>
-            </li>
+            <SidebarItem
+              to={`/mentor/${user._id}`}
+              icon={<PiStudentDuotone />}
+              label="Mentor Page"
+            />
           ) : (
-            <li className='flex justify-center md:justify-start'>
-              <Link
-                to='/mentorship'
-                className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-              >
-                <PiStudentDuotone className='w-6 h-6' />
-                <span className='text-lg hidden md:block'>Mentorship</span>
-              </Link>
-            </li>
+            <SidebarItem to="/mentorship" icon={<PiStudentDuotone />} label="Mentorship" />
           )}
-            <li className='flex justify-center md:justify-start'>
-            <Link
-              to={`/profile/${user?.username}`}
-              className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-            >
-              <FaUser className='w-6 h-6' />
-              <span className='text-lg hidden md:block'>Profile</span>
-            </Link>
-          </li>
-          <li className='flex justify-center md:justify-start'>
-            <button
-              onClick={logout}
-              className='flex gap-3 items-center text-red-500 hover:bg-red-950 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
-            >
-              <BiLogOut className='w-6 h-6' />
-              <span className='text-lg hidden md:block'>Logout</span>
-            </button>
-          </li>
-        </ul>
+
+          <SidebarItem
+            to={`/profile/${user?.username}`}
+            icon={<FaUser />}
+            label="Profile"
+          />
+
+          {/* Logout */}
+          <button
+            onClick={logout}
+            className="flex items-center gap-3 text-red-500 hover:bg-red-900 w-full px-3 py-2 rounded-full transition-all"
+          >
+            <BiLogOut className="w-6 h-6" />
+            <span className="text-md hidden md:block">Logout</span>
+          </button>
+        </nav>
       </div>
     </div>
   );
 };
+
+
+const SidebarItem = ({ to, icon, label }) => (
+  <Link
+    to={to}
+    className="flex items-center gap-3 hover:bg-stone-900 w-full px-3 py-2 rounded-full transition-all"
+  >
+    <span className="w-6 h-6">{icon}</span>
+    <span className="text-md hidden md:block">{label}</span>
+  </Link>
+);
 
 export default Sidebar;
