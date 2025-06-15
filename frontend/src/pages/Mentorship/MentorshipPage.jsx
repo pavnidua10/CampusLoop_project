@@ -55,10 +55,8 @@ const MentorshipPage = () => {
   };
   
 
-  if (isUserLoading) return <p><div className='flex justify-center h-full items-center'>
-              <LoadingSpinner size='lg' />
-            </div></p>;
-
+  if (isUserLoading) return <p>Loading your mentorship data...</p>;
+ 
   if (userError) return <p>Error: {userError.message}</p>;
   if (!userProfile) return <p>No user profile found.</p>;
   console.log("Mentor Chat ID (whole):", userProfile.assignedMentorChatId);
