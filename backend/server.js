@@ -25,8 +25,7 @@ import UserChat from "./models/chat.model.js";
 import chatbotRoutes from "./routes/chatbot.routes.js";
 
 dotenv.config({ path: './backend/.env' });
-console.log("OPENAI KEY:", process.env.OPENAI_API_KEY);
-console.log("CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -42,7 +41,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: true,
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -56,7 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: true,
     credentials: true,
   })
 );
@@ -75,7 +74,6 @@ app.use("/api/mentorResources", mentorDashboardRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 
 // app.use("/api/pdf_ai", aiRoutes);
-console.log("OPENAI KEY:", process.env.OPENAI_API_KEY);
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static(path.join(__dirname, "/frontend/dist")));
@@ -84,15 +82,13 @@ console.log("OPENAI KEY:", process.env.OPENAI_API_KEY);
 //   });
 // }
 if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "frontend", "build");
+  const buildPath = path.join(__dirname, "frontend", "dist");
   app.use(express.static(buildPath));
 
-  // Catch-all to serve React routes
   app.get("*", (req, res) => {
     res.sendFile(path.join(buildPath, "index.html"));
   });
 }
-
 let onlineUsers = {};
 
 io.on("connection", (socket) => {
