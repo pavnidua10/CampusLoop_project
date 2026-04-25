@@ -23,6 +23,7 @@ const bottomRef = useRef(null);
   // 🔹 Join mentorship chat room
   useEffect(() => {
     if (!id || !user?._id) return;
+     if (!socket.connected) socket.connect(); 
     socket.emit("join chat", id);
     
   return () => {

@@ -13,6 +13,7 @@ const MenteeChat = ({ mentee, chatId }) => {
 
   useEffect(() => {
     if (!chatId || !user?._id) return;
+     if (!socket.connected) socket.connect(); 
     socket.emit("join chat", chatId);
   }, [chatId, user?._id]);
 

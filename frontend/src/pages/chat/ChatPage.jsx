@@ -13,15 +13,52 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [suggestedUsers, setSuggestedUsers] = useState([]);
-  const [showSidebar, setShowSidebar] = useState(!chatId); // show sidebar by default on mobile if no chat selected
+  const [showSidebar, setShowSidebar] = useState(!chatId);
 
   const scrollRef = useRef();
   const inputRef = useRef();
 
+  // ✅ Single effect for socket connection + message listener + room joining
   useEffect(() => {
+    if (!chatId) return;
+
+    setShowSidebar(false);
+
+    // Only connect if not already connected
     if (!socket.connected) socket.connect();
-    return () => { socket.off("receive-normal-message"); };
-  }, []);
+
+    socket.emit("join chat", chatId);
+
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/message/get-messages?chatId=${chatId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
+        });
+        const data = await res.json();
+        setMessages(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchMessages();
+
+    // ✅ Named function so it can be properly removed on cleanup
+    const handleNormalMessage = (data) => {
+      setMessages((prev) => {
+        if (!Array.isArray(prev)) return [data.message];
+        if (prev.some((m) => m._id === data.message._id)) return prev;
+        return [...prev, data.message];
+      });
+    };
+
+    socket.on("receive-normal-message", handleNormalMessage);
+
+    return () => {
+      socket.emit("leave chat", chatId);
+      socket.off("receive-normal-message", handleNormalMessage); // ✅ removes only this listener
+    };
+  }, [chatId, token]);
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -38,36 +75,12 @@ const ChatPage = () => {
           });
           setSuggestedUsers(await sugRes.json());
         }
-      } catch (err) { console.error(err); }
+      } catch (err) {
+        console.error(err);
+      }
     };
     fetchConversations();
   }, [token]);
-
-  useEffect(() => {
-    if (!chatId) return;
-    setShowSidebar(false); // hide sidebar when chat opens on mobile
-    socket.emit("join chat", chatId);
-
-    const fetchMessages = async () => {
-      const res = await fetch(`${API_URL}/api/message/get-messages?chatId=${chatId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
-      });
-      const data = await res.json();
-      setMessages(Array.isArray(data) ? data : []);
-    };
-    fetchMessages();
-
-    socket.on("receive-normal-message", (data) => {
-      setMessages((prev) => {
-        if (!Array.isArray(prev)) return [data.message];
-        if (prev.some((m) => m._id === data.message._id)) return prev;
-        return [...prev, data.message];
-      });
-    });
-
-    return () => { socket.emit("leave chat", chatId); };
-  }, [chatId, token]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -90,7 +103,9 @@ const ChatPage = () => {
       if (!res.ok) return;
       const data = await res.json();
       socket.emit("send message", { ...data, chatId });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -109,7 +124,6 @@ const ChatPage = () => {
   };
 
   const activeChat = conversations.find((c) => c.chatId === chatId);
-
   const initials = (name) => name ? name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() : "?";
 
   return (
@@ -137,7 +151,6 @@ const ChatPage = () => {
 
       {/* SIDEBAR */}
       <div className={`sidebar-panel md:relative md:transform-none md:flex md:flex-col md:w-72 md:border-r md:border-white/5 ${showSidebar ? "open" : ""}`}>
-        {/* Sidebar Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
           <h1 className="text-lg font-semibold tracking-tight">Messages</h1>
           <button className="md:hidden text-white/50 hover:text-white p-1" onClick={() => setShowSidebar(false)}>
@@ -147,7 +160,6 @@ const ChatPage = () => {
           </button>
         </div>
 
-        {/* Search bar */}
         <div className="px-4 py-3">
           <div className="flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-white/30 flex-shrink-0">
@@ -158,7 +170,6 @@ const ChatPage = () => {
           </div>
         </div>
 
-        {/* Conversation list */}
         <div className="flex-1 overflow-y-auto custom-scroll">
           {conversations.length === 0 ? (
             <p className="text-white/30 text-sm px-5 py-4">No conversations yet</p>
@@ -189,9 +200,7 @@ const ChatPage = () => {
 
       {/* CHAT AREA */}
       <div className="chat-area flex-1 flex flex-col">
-        {/* Header */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-[#0f0f13]/80 backdrop-blur-sm flex-shrink-0">
-          {/* Back button on mobile */}
           <button
             className="md:hidden text-white/50 hover:text-white mr-1 p-1 -ml-1"
             onClick={() => { setShowSidebar(true); navigate("/chat"); }}
@@ -201,7 +210,6 @@ const ChatPage = () => {
             </svg>
           </button>
 
-          {/* Show sidebar toggle on desktop when no chat */}
           {!chatId && (
             <button className="md:hidden text-white/50 hover:text-white p-1" onClick={() => setShowSidebar(true)}>
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
