@@ -1,22 +1,32 @@
 
 import express from "express";
 import { protectRoute } from "../middleware/protectRoute.js";
-import { uploadResource,getTasks,createTask,toggleTask,deleteTask } from "../controllers/mentorDashboard.controller.js";
+import {
+  uploadResource,
+  getResourcesForChat,
+  getTasks,
+  createTask,
+  toggleTask,
+  deleteTask,
+  getMyResources,
+} from "../controllers/mentorDashboard.controller.js";
 import { upload } from "../lib/utils/multer.js";
 
 const router = express.Router();
-router.get("/:chatId", protectRoute, getTasks);
 
-// Create a new task
+// ⚠️  ORDER MATTERS — static routes must come BEFORE dynamic /:param routes
+
+// Static routes first
+router.get("/my-resources", protectRoute, getMyResources);
+router.post("/upload-resource", protectRoute, upload.single("file"), uploadResource);
 router.post("/", protectRoute, createTask);
 
-// Toggle task completion
-router.patch("/:id", protectRoute, toggleTask);
+// NEW: mentee-accessible resource fetch for a specific chat
+router.get("/chat/:chatId/resources", protectRoute, getResourcesForChat);
 
-// Delete a task
+// Dynamic routes last (otherwise /my-resources and /upload-resource get swallowed by /:chatId)
+router.get("/:chatId", protectRoute, getTasks);
+router.patch("/:id", protectRoute, toggleTask);
 router.delete("/:id", protectRoute, deleteTask);
-router.post("/upload-resource", protectRoute, upload.single("file"), uploadResource);
-// router.get("/my-resources", protectRoute, getMentorResources);
-// router.get("/resources", protectRoute, getResourcesForMentee);
 
 export default router;

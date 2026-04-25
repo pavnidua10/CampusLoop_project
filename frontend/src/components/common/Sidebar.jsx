@@ -9,7 +9,6 @@ import { BsChatDots } from "react-icons/bs";
 import { PiStudentDuotone } from "react-icons/pi";
 import { BiLogOut } from "react-icons/bi";
 import { BsRobot } from "react-icons/bs";
-
 import { RiAiGenerate } from "react-icons/ri";
 
 import { useAuth } from "../../Context/AuthContext";
@@ -21,7 +20,10 @@ const Sidebar = () => {
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${API_URL}/api/auth/logout`, { method: "POST",credentials: "include", });
+      const res = await fetch(`${API_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Logout failed");
     },
@@ -38,7 +40,6 @@ const Sidebar = () => {
   return (
     <div className="h-full w-full px-4 py-6">
       <div className="flex flex-col items-start space-y-6">
-      
         <Link to="/" className="w-full flex justify-center md:justify-start">
           <img
             src={CampusLoopLogo}
@@ -47,19 +48,19 @@ const Sidebar = () => {
           />
         </Link>
 
-  
         <nav className="w-full space-y-3">
           <SidebarItem to="/" icon={<MdHomeFilled />} label="Home" />
           <SidebarItem to="/search" icon={<IoSearch />} label="Search" />
-  <SidebarItem 
-  to="/students-corner" 
-  icon={<RiAiGenerate />} 
-  label="Student’s Corner" 
-/>
-
-
-          <SidebarItem to="/notifications" icon={<IoNotifications />} label="Notifications" />
-
+          <SidebarItem
+            to="/students-corner"
+            icon={<RiAiGenerate />}
+            label="Students Corner"
+          />
+          <SidebarItem
+            to="/notifications"
+            icon={<IoNotifications />}
+            label="Notifications"
+          />
           <SidebarItem to="/chat" icon={<BsChatDots />} label="Chat" />
 
           {user?.isAvailableForMentorship ? (
@@ -69,7 +70,11 @@ const Sidebar = () => {
               label="Mentor Page"
             />
           ) : (
-            <SidebarItem to="/mentorship" icon={<PiStudentDuotone />} label="Mentorship" />
+            <SidebarItem
+              to="/mentorship"
+              icon={<PiStudentDuotone />}
+              label="Mentorship"
+            />
           )}
 
           <SidebarItem
@@ -78,12 +83,11 @@ const Sidebar = () => {
             label="Profile"
           />
 
-     <SidebarItem
-  to="/chatbot"
-  icon={<BsRobot />}
-  label="CampusLoop AI"
-/>
-
+          <SidebarItem
+            to="/chatbot"
+            icon={<BsRobot />}
+            label="CampusLoop AI"
+          />
 
           {/* Logout */}
           <button
@@ -91,7 +95,7 @@ const Sidebar = () => {
             className="flex items-center gap-3 text-red-500 hover:bg-red-900 w-full px-3 py-2 rounded-full transition-all"
           >
             <BiLogOut className="w-6 h-6" />
-            <span className="text-md hidden md:block">Logout</span>
+            <span className="text-md">Logout</span> {/* removed `hidden md:block` */}
           </button>
         </nav>
       </div>
@@ -99,14 +103,13 @@ const Sidebar = () => {
   );
 };
 
-
 const SidebarItem = ({ to, icon, label }) => (
   <Link
     to={to}
     className="flex items-center gap-3 hover:bg-stone-900 w-full px-3 py-2 rounded-full transition-all"
   >
     <span className="w-6 h-6">{icon}</span>
-    <span className="text-md hidden md:block">{label}</span>
+    <span className="text-md">{label}</span> {/* text visible on all screens */}
   </Link>
 );
 

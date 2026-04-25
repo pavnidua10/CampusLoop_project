@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config({ path: './backend/.env' });
+
 import path from "path";
 import express from "express";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import { v2 as cloudinary } from "cloudinary";
 import http from "http";
@@ -20,11 +22,11 @@ import assignMentorRoutes from "./routes/assignedMentor.routes.js";
 import MentorshipMessage from "./models/mentorshipMessage.model.js"; 
 import AnonymousQna from "./routes/AnonymousQna.routes.js"
 import mentorDashboardRoutes from "./routes/mentorDashboard.routes.js"
-// import aiRoutes from "./routes/pdf_ai.routes.js";
+import aiRoutes from "./routes/pdf_ai.routes.js";
 import UserChat from "./models/chat.model.js";
 import chatbotRoutes from "./routes/chatbot.routes.js";
 
-dotenv.config({ path: './backend/.env' });
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -73,7 +75,7 @@ app.use("/api/qna",AnonymousQna)
 app.use("/api/mentorResources", mentorDashboardRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 
-// app.use("/api/pdf_ai", aiRoutes);
+app.use("/api/pdf_ai", aiRoutes);
 
 // if (process.env.NODE_ENV === "production") {
 //   app.use(express.static(path.join(__dirname, "/frontend/dist")));

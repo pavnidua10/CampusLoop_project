@@ -71,3 +71,53 @@ export const getAssignedMentees = async (req, res) => {
 };
 
 
+export const getMentees = async (req, res) => {
+  try {
+    const { mentorId } = req.params;
+
+    // Find all mentorship chats where this user is the mentor
+    const chats = await MentorshipChat.find({ mentor: mentorId })
+      .populate("mentee", "username fullName profileImg _id");
+
+    if (!chats || chats.length === 0) {
+      return res.status(200).json({ mentees: [] });
+    }
+
+    // Shape each mentee with chatId attached
+    const mentees = chats
+      .filter((c) => c.mentee) // guard against deleted users
+      .map((c) => ({
+        _id: c.mentee._id,
+        username: c.mentee.username,
+        fullName: c.mentee.fullName,
+        profileImg: c.mentee.profileImg,
+        chatId: c._id, // ← MentorshipChat._id used for tasks & resources
+      }));
+
+    res.status(200).json({ mentees });
+  } catch (err) {
+    console.error("getMentees error:", err);
+    res.status(500).json({ message: "Error fetching mentees" });
+  }
+};
+
+// GET /api/mentee/my-mentor — mentee gets their mentor info + chatId
+export const getMyMentor = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate("assignedMentor", "username fullName profileImg bio")
+      .populate("assignedMentorChatId");
+
+    if (!user.assignedMentor) {
+      return res.status(200).json({ mentor: null, chatId: null });
+    }
+
+    res.status(200).json({
+      mentor: user.assignedMentor,
+      chatId: user.assignedMentorChatId?._id || null,
+    });
+  } catch (err) {
+    console.error("getMyMentor error:", err);
+    res.status(500).json({ message: "Error fetching mentor info" });
+  }
+};

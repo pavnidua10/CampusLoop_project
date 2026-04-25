@@ -6,7 +6,7 @@ import MentorQnA from "../../components/mentors/MentorQna";
 import { useAuth } from "../../Context/AuthContext";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 const MentorPage = () => {
-  const { user } = useAuth(); 
+ const { user, isUserLoading } = useAuth();
   const mentorId = user?._id;
   console.log("mentorId:", mentorId);
   const [activeTab, setActiveTab] = useState("dashboard"); 

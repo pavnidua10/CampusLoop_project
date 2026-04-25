@@ -8,7 +8,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Store file temporarily on server
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -20,15 +19,12 @@ const storage = multer.diskStorage({
 
 export const upload = multer({ storage });
 
-// Helper to upload to Cloudinary manually
 export const uploadToCloudinary = async (filePath) => {
   const result = await cloudinary.uploader.upload(filePath, {
     folder: "mentor_resources",
     resource_type: "auto",
   });
 
-  // Delete local file after upload
   fs.unlinkSync(filePath);
-
   return result.secure_url;
 };

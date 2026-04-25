@@ -1,18 +1,21 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import Chatbot from "../models/chatbot.model.js";
 
 export const askChatbot = async (req, res) => {
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const { message } = req.body;
     const userId = req.user._id;
 
-    if (!message) {
+    if (!message || !message.trim()) {
       return res.status(400).json({ error: "Message is required" });
     }
+
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "GROQ_API_KEY is missing or empty" });
+    }
+
+    const groq = new Groq({ apiKey });
 
     let chat = await Chatbot.findOne({ user: userId });
 
@@ -25,14 +28,14 @@ export const askChatbot = async (req, res) => {
 
     chat.messages.push({
       role: "user",
-      content: message,
+      content: message.trim(),
     });
 
     const aiMessages = [
       {
         role: "system",
         content:
-          "You are CampusLoop AI, a helpful university assistant helping students with mentorship, study guidance, tasks, and career advice.",
+          "You are CampusLoop AI, a helpful university assistant helping students with mentorship, study guidance, assignments, productivity, career advice, internships, and student support. Keep answers clear, practical, and student-friendly.",
       },
       ...chat.messages.map((msg) => ({
         role: msg.role,
@@ -40,12 +43,18 @@ export const askChatbot = async (req, res) => {
       })),
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: aiMessages,
+      temperature: 0.7,
+      max_completion_tokens: 1024,
     });
 
-    const reply = completion.choices[0].message.content;
+    const reply = completion.choices?.[0]?.message?.content?.trim();
+
+    if (!reply) {
+      return res.status(500).json({ error: "Empty response from AI" });
+    }
 
     chat.messages.push({
       role: "assistant",
@@ -56,9 +65,9 @@ export const askChatbot = async (req, res) => {
 
     res.status(200).json({ reply });
   } catch (error) {
-  console.error("FULL CHATBOT ERROR:", error);
-  res.status(500).json({ error: error.message });
-}
+    console.error("FULL CHATBOT ERROR:", error);
+    res.status(500).json({ error: error.message || "Chatbot failed" });
+  }
 };
 
 export const clearChat = async (req, res) => {

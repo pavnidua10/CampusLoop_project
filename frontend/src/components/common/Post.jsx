@@ -91,7 +91,7 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 
   return (
     <>
-      <div className="bg-white dark:bg-base-200 rounded-xl p-5 mb-4 shadow hover:shadow-md transition">
+      <div className="bg-gray-200 dark:bg-base-200 rounded-xl p-5 mb-4 shadow hover:shadow-md transition">
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-3">

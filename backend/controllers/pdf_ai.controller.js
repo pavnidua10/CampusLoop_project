@@ -1,127 +1,196 @@
-// import fs from "fs";
-// import PDFDocument from "pdfkit";
-// import OpenAI from "openai";
-// import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFDocument from "pdfkit";
+import Groq from "groq-sdk";
+import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import { join } from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// export const generateFromPDF = async (req, res) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).json({ error: "No PDF uploaded" });
-//     }
+const pdfjsPath = join(__dirname, "../../node_modules/pdfjs-dist");
+const standardFontDataUrl = join(pdfjsPath, "standard_fonts") + "/";
 
-//     const { feature } = req.body;
-//     const filePath = req.file.path;
+async function extractTextFromPDF(buffer) {
+  const loadingTask = pdfjs.getDocument({
+    data: new Uint8Array(buffer),
+    standardFontDataUrl,
+    disableRange: true,
+    disableStream: true,
+    disableAutoFetch: true,
+  });
 
-//     // -----------------------------
-//     // 1️⃣ Extract Text From PDF
-//     // -----------------------------
-//     const data = new Uint8Array(fs.readFileSync(filePath));
-//     const pdf = await pdfjsLib.getDocument({ data }).promise;
+  const pdf = await loadingTask.promise;
+  const textParts = [];
 
-//     let text = "";
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items.map((item) => item.str).join(" ");
+    textParts.push(pageText);
+  }
 
-//     for (let i = 1; i <= pdf.numPages; i++) {
-//       const page = await pdf.getPage(i);
-//       const content = await page.getTextContent();
-//       const strings = content.items.map((item) => item.str);
-//       text += strings.join(" ") + "\n";
-//     }
+  return textParts.join("\n");
+}
 
-//     text = text.slice(0, 10000); // limit size
+const PROMPTS = {
+  test: (text) => `
+You are an academic exam paper creator. Based on the following study material, generate a professional test paper with:
+- 5 Multiple Choice Questions (4 options each, mark the correct answer with *)
+- 5 Short Answer Questions (2-3 sentences expected)
+- 3 Long Answer / Essay Questions
 
-//     // -----------------------------
-//     // 2️⃣ Create Prompt
-//     // -----------------------------
-//     let prompt = "";
+Format clearly with section headings. Be thorough and academically rigorous.
 
-//     if (feature === "summary") {
-//       prompt = `
-// Create a well-structured academic summary with:
-// - Proper headings
-// - Bullet points
-// - Clear explanations
+Study Material:
+${text}
+`,
+  summary: (text) => `
+You are an expert academic summarizer. Based on the following study material, generate:
+- A concise executive summary (3-4 sentences)
+- Key Concepts (bullet points, each with a brief explanation)
+- Important Definitions
+- Key Takeaways (5-7 points)
 
-// Content:
-// ${text}
-// `;
-//     } else if (feature === "questions") {
-//       prompt = `
-// Generate important university-level exam questions.
+Make it student-friendly and well-structured.
 
-// Divide into:
-// Section A (Short Answer)
-// Section B (Long Answer)
+Study Material:
+${text}
+`,
+  questions: (text) => `
+You are an expert academic coach. Based on the following study material, generate:
+- 10 Most Important Questions likely to appear in exams (with brief answer hints)
+- 5 Tricky/Conceptual Questions (with explanation of why they are important)
+- 5 One-liner fact-based questions
 
-// Content:
-// ${text}
-// `;
-//     } else {
-//       prompt = `
-// Create a structured university-level test paper.
+Format with clear numbering and sections.
 
-// Include:
-// - Section A (MCQs)
-// - Section B (Short Answers)
-// - Section C (Long Answers)
-// - Marks distribution
+Study Material:
+${text}
+`,
+};
 
-// Content:
-// ${text}
-// `;
-//     }
+const FEATURE_TITLES = {
+  test: "AI Generated Test Paper",
+  summary: "AI Generated Summary",
+  questions: "AI Generated Important Questions",
+};
 
-//     // -----------------------------
-//     // 3️⃣ Generate AI Content
-//     // -----------------------------
-//     const completion = await openai.chat.completions.create({
-//       model: "gpt-4o-mini", // affordable + powerful
-//       messages: [
-//         { role: "system", content: "You are a helpful academic assistant." },
-//         { role: "user", content: prompt },
-//       ],
-//     });
+function writeAiTextToPdf(doc, aiText) {
+  for (const line of aiText.split("\n")) {
+    const t = line.trim();
 
-//     const responseText = completion.choices[0].message.content;
+    if (!t) {
+      doc.moveDown(0.4);
+      continue;
+    }
 
-//     // -----------------------------
-//     // 4️⃣ Create Output PDF
-//     // -----------------------------
-//     const pdfPath = `generated_${Date.now()}.pdf`;
+    if (/^#{1,2} /.test(t)) {
+      doc.font("Helvetica-Bold").fontSize(13).fillColor("#1E1B4B").text(t.replace(/^#+\s*/, ""), {
+        paragraphGap: 4,
+      });
+      doc.moveDown(0.2);
+    } else if (/^\*\*.+\*\*$/.test(t)) {
+      doc.font("Helvetica-Bold").fontSize(11).fillColor("#312E81").text(t.replace(/\*\*/g, ""), {
+        paragraphGap: 2,
+      });
+    } else if (/^[-*] /.test(t)) {
+      doc.font("Helvetica").fontSize(11).fillColor("#111827").text(`• ${t.slice(2)}`, {
+        indent: 10,
+        paragraphGap: 2,
+      });
+    } else if (/^\d+\./.test(t)) {
+      doc.font("Helvetica").fontSize(11).fillColor("#111827").text(t, {
+        indent: 10,
+        paragraphGap: 2,
+      });
+    } else {
+      doc.font("Helvetica").fontSize(11).fillColor("#111827").text(t, {
+        paragraphGap: 2,
+      });
+    }
+  }
+}
 
-//     const doc = new PDFDocument({ margin: 40 });
-//     const stream = fs.createWriteStream(pdfPath);
+export const generatePdfAI = async (req, res) => {
+  try {
+    const { feature } = req.body;
 
-//     doc.pipe(stream);
+    if (!req.file) {
+      return res.status(400).json({ message: "No PDF file uploaded" });
+    }
 
-//     doc.fontSize(18).text("CampusLoop - Student’s Corner", {
-//       align: "center",
-//     });
+    if (!["test", "summary", "questions"].includes(feature)) {
+      return res.status(400).json({ message: "Invalid feature type" });
+    }
 
-//     doc.moveDown();
-//     doc.fontSize(12).text(responseText);
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ message: "GROQ_API_KEY is missing or empty" });
+    }
 
-//     doc.end();
+    let extractedText = "";
+    try {
+      extractedText = await extractTextFromPDF(req.file.buffer);
+    } catch (err) {
+      console.error("PDF text extraction error:", err);
+      return res.status(400).json({
+        message: `Failed to parse the PDF: ${err.message}`,
+      });
+    }
 
-//     // -----------------------------
-//     // 5️⃣ Send File + Cleanup
-//     // -----------------------------
-//     stream.on("finish", () => {
-//       res.download(pdfPath, () => {
-//         try {
-//           fs.unlinkSync(pdfPath);
-//           fs.unlinkSync(filePath);
-//         } catch (cleanupError) {
-//           console.error("Cleanup error:", cleanupError);
-//         }
-//       });
-//     });
+    extractedText = extractedText.trim();
 
-//   } catch (error) {
-//     console.error("AI generation error:", error);
-//     res.status(500).json({ error: "AI generation failed" });
-//   }
-// };
+    if (!extractedText || extractedText.length < 100) {
+      return res.status(400).json({
+        message: "Could not extract enough text from the PDF. Make sure it is not a scanned image-only file.",
+      });
+    }
+
+    const groq = new Groq({ apiKey });
+    const truncatedText = extractedText.slice(0, 12000);
+    const prompt = PROMPTS[feature](truncatedText);
+
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 4000,
+    });
+
+    const aiText = completion.choices?.[0]?.message?.content?.trim();
+
+    if (!aiText) {
+      return res.status(500).json({ message: "AI returned empty content" });
+    }
+
+    const title = FEATURE_TITLES[feature];
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${title.replace(/ /g, "_")}.pdf"`);
+
+    const doc = new PDFDocument({ margin: 50, size: "A4" });
+    doc.pipe(res);
+
+    doc.font("Helvetica-Bold").fontSize(20).fillColor("#4F46E5").text(title, { align: "center" });
+
+    doc.moveDown(0.4);
+    doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor("#6366F1").lineWidth(1).stroke();
+    doc.moveDown(1);
+
+    writeAiTextToPdf(doc, aiText);
+
+    doc.moveDown(2);
+    doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor("#E5E7EB").lineWidth(0.5).stroke();
+    doc.moveDown(0.5);
+    doc.font("Helvetica").fontSize(9).fillColor("#9CA3AF").text("Generated by Student's Corner AI — Powered by Groq", {
+      align: "center",
+    });
+
+    doc.end();
+  } catch (error) {
+    console.error("PDF AI generation error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "AI generation failed", error: error.message });
+    }
+  }
+};
