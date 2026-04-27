@@ -32,7 +32,7 @@ enabled: true,
       setUser(data);
       setToken(data.token); 
       setUserId(data._id);
-      console.log("✅ Auth user set:", data);
+      // console.log("✅ Auth user set:", data);
     }
   }, [data]);
 
